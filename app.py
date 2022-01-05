@@ -1,20 +1,28 @@
-from flask import Flask
-import requests
-import json
+from api_client import get_new_data
+from storage import *
+import threading
+import time
+from dash_app import app, create_layout
 
-app = Flask(__name__)
+collector_running = True
 
-@app.route('/')
-def main():
-    uri = "http://tesla.iem.pw.edu.pl:9080/v2/monitor/2"
-    try:
-        uResponse = requests.get(uri)
-    except requests.ConnectionError:
-        return "Connection Error"
-    Jresponse = uResponse.text
-    #data = json.loads(Jresponse)
 
-    return Jresponse
+class DataCollectorThread(threading.Thread):
+    def run(self):
+        while collector_running:
+            add_measurements(2, get_new_data("2"))
+            expire_data(5)
+            print(get_storage())
+            time.sleep(1)
+
 
 if __name__ == "__main__":
-    app.run()
+    # Initialization
+    init_storage()
+    create_layout()
+    # Start the collector
+    collector = DataCollectorThread()
+    collector.start()
+    # Start dash app
+    app.run_server(debug=True)
+

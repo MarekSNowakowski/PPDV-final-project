@@ -11,7 +11,7 @@ class DataCollectorThread(threading.Thread):
     def run(self):
         while collector_running:
             add_measurements(2, get_new_data("2"))
-            expire_data(5)
+            expire_data(20)
             print(get_storage())
             time.sleep(1)
 

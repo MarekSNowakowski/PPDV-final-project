@@ -1,3 +1,4 @@
+from datetime import datetime
 import time
 
 global _storage
@@ -16,6 +17,11 @@ def get_storage():
 
 def add_measurements(patient_id, data):
     storage = get_storage()
+
+    # convert timestamp
+    timestamp_str = str(data["timestamp"])
+    timestamp = f"{timestamp_str[0:-12]}:{timestamp_str[-12:-10]}:{timestamp_str[-10:-8]}"
+
     if patient_id not in storage:
         patient_data = {
             "timestamps": [],
@@ -27,7 +33,7 @@ def add_measurements(patient_id, data):
     else:
         patient_data = storage[patient_id]
 
-    patient_data["timestamps"].append(data["timestamp"])
+    patient_data["timestamps"].append(timestamp)
     patient_data["values"].append(data["values"])
     patient_data["anomalies"].append(data["anomalies"])
     patient_data["_expire_ts"].append(time.time())

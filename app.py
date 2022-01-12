@@ -28,4 +28,5 @@ if __name__ == "__main__":
     collector = DataCollectorThread()
     collector.start()
     # Start dash app
+    app.config.suppress_callback_exceptions = True
     app.run_server(debug=True)

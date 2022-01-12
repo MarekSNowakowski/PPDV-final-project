@@ -15,9 +15,8 @@ class DataCollectorThread(threading.Thread):
             add_measurements(3, get_new_data("3"))
             add_measurements(4, get_new_data("4"))
             add_measurements(5, get_new_data("5"))
-            expire_data(20)
-            # print(get_storage())
-            time.sleep(1)
+            expire_data(600)    # Expire data after 10 minutes
+            time.sleep(0.2)     # Get data 5 times per second
 
 
 if __name__ == "__main__":

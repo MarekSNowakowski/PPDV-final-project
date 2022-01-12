@@ -1,6 +1,8 @@
 from datetime import datetime
 import time
 
+import numpy as np
+
 global _storage
 
 
@@ -33,10 +35,22 @@ def add_measurements(patient_id, data):
     else:
         patient_data = storage[patient_id]
 
-    patient_data["timestamps"].append(timestamp)
-    patient_data["values"].append(data["values"])
-    patient_data["anomalies"].append(data["anomalies"])
-    patient_data["_expire_ts"].append(time.time())
+    timestamps_amount = len(patient_data["timestamps"])
+    if timestamps_amount > 0 and patient_data["timestamps"][timestamps_amount - 1] == timestamp:    # Add smoothing
+        patient_data["values"][timestamps_amount - 1] = \
+            smooth_data(data["values"], patient_data["values"][timestamps_amount - 1])
+    else:   # Add record
+        patient_data["timestamps"].append(timestamp)
+        patient_data["values"].append(data["values"])
+        patient_data["anomalies"].append(data["anomalies"])
+        patient_data["_expire_ts"].append(time.time())
+
+
+def smooth_data(data1, data2):
+    smoothed = [0, 0, 0, 0, 0, 0]
+    for i in range(0, 6):
+        smoothed[i] = (data1[i] + data2[i]) / 2
+    return smoothed
 
 
 def expire_data(s):

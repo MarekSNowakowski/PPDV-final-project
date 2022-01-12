@@ -1,7 +1,5 @@
-from datetime import datetime
+import logging
 import time
-
-import numpy as np
 
 global _storage
 
@@ -20,10 +18,6 @@ def get_storage():
 def add_measurements(patient_id, data):
     storage = get_storage()
 
-    # convert timestamp
-    timestamp_str = str(data["timestamp"])
-    timestamp = f"{timestamp_str[0:-12]}:{timestamp_str[-12:-10]}:{timestamp_str[-10:-8]}"
-
     if patient_id not in storage:
         patient_data = {
             "timestamps": [],
@@ -35,15 +29,22 @@ def add_measurements(patient_id, data):
     else:
         patient_data = storage[patient_id]
 
-    timestamps_amount = len(patient_data["timestamps"])
-    if timestamps_amount > 0 and patient_data["timestamps"][timestamps_amount - 1] == timestamp:    # Add smoothing
-        patient_data["values"][timestamps_amount - 1] = \
-            smooth_data(data["values"], patient_data["values"][timestamps_amount - 1])
-    else:   # Add record
-        patient_data["timestamps"].append(timestamp)
-        patient_data["values"].append(data["values"])
-        patient_data["anomalies"].append(data["anomalies"])
-        patient_data["_expire_ts"].append(time.time())
+    # print(data)
+    try:
+        # convert timestamp
+        timestamp_str = str(data["timestamp"])
+        timestamp = f"{timestamp_str[0:-12]}:{timestamp_str[-12:-10]}:{timestamp_str[-10:-8]}"
+        timestamps_amount = len(patient_data["timestamps"])
+        if timestamps_amount > 0 and patient_data["timestamps"][timestamps_amount - 1] == timestamp:  # Add smoothing
+            patient_data["values"][timestamps_amount - 1] = \
+                smooth_data(data["values"], patient_data["values"][timestamps_amount - 1])
+        else:  # Add record
+            patient_data["timestamps"].append(timestamp)
+            patient_data["values"].append(data["values"])
+            patient_data["anomalies"].append(data["anomalies"])
+            patient_data["_expire_ts"].append(time.time())
+    except TypeError:
+        logging.warning("No data! Make sure you are connected to VPN")
 
 
 def smooth_data(data1, data2):

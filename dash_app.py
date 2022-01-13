@@ -28,6 +28,24 @@ def draw_plot():
         go.Scatter(x=timestamps, y=values[:, 4], line=dict(color='green', width=3), name='R1'),
         go.Scatter(x=timestamps, y=values[:, 5], line=dict(color='lime', width=3), name='R2'),
     ])
+    anomaly_timestamps = []
+    anomaly_values = []
+    for i in range(0, len(timestamps) - 1):
+        if anomalies[i].any():
+            j = 0
+            for anomaly in anomalies[i]:
+                if anomaly:
+                    anomaly_timestamps.append(timestamps[i])
+                    anomaly_values.append(values[i, j])
+                j += 1
+    fig.add_trace(go.Scatter(
+        x=anomaly_timestamps,
+        y=anomaly_values,
+        marker=dict(color="red", size=6),
+        mode="markers",
+        name="Anomaly",
+    ))
+
     return fig
 
 
@@ -56,7 +74,6 @@ def create_layout(_patient_id):
     else:
         disabled = "No"
 
-    print(patient_data["firstname"])
     d = {
         'Firstname': [patient_data["firstname"]],
         'Lastname': [patient_data["lastname"]],

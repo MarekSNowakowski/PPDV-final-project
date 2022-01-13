@@ -10,6 +10,11 @@ def get_new_data(patient_id):
     jResponse = uResponse.json()
 
     return {
+        "birthdate": jResponse["birthdate"],
+        "disabled": jResponse["disabled"],
+        "firstname": jResponse["firstname"],
+        "lastname": jResponse["lastname"],
+        "name": jResponse["trace"]["name"],
         "timestamp": jResponse["trace"]["id"],
         "values": [x["value"] for x in jResponse["trace"]["sensors"]],
         "anomalies": [x["anomaly"] for x in jResponse["trace"]["sensors"]]

@@ -18,19 +18,23 @@ def get_storage():
 def add_measurements(patient_id, data):
     storage = get_storage()
 
-    if patient_id not in storage:
-        patient_data = {
-            "timestamps": [],
-            "values": [],
-            "anomalies": [],
-            "_expire_ts": []
-        }
-        storage[patient_id] = patient_data
-    else:
-        patient_data = storage[patient_id]
-
-    # print(data)
     try:
+        if patient_id not in storage:
+            patient_data = {
+                "birthdate": data["birthdate"],
+                "disabled": data["disabled"],
+                "firstname": data["firstname"],
+                "lastname": data["lastname"],
+                "name": data["name"],
+                "timestamps": [],
+                "values": [],
+                "anomalies": [],
+                "_expire_ts": []
+            }
+            storage[patient_id] = patient_data
+        else:
+            patient_data = storage[patient_id]
+
         # convert timestamp
         timestamp_str = str(data["timestamp"])
         timestamp = f"{timestamp_str[0:-12]}:{timestamp_str[-12:-10]}:{timestamp_str[-10:-8]}"

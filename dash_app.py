@@ -1,9 +1,8 @@
 import dash
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
-
-from dash import dcc
-from dash import html
+from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output
 
 from storage import get_storage
@@ -32,13 +31,13 @@ def draw_plot():
     return fig
 
 
-app = dash.Dash()
+app = dash.Dash(__name__)
 
 app.layout = html.Div([
     # represents the URL bar, doesn't render anything
     dcc.Location(id='url', refresh=False),
 
-    html.H1(id='H1', children=f'Python programming and data visualisation final project - Marek Nowakowski',
+    html.H1(id='H1', children='Python programming and data visualisation final project - Marek Nowakowski',
             style={'textAlign': 'center', 'marginTop': 40, 'marginBottom': 40}),
 
     html.Div(id='content', children=[
@@ -50,6 +49,23 @@ app.layout = html.Div([
 def create_layout(_patient_id):
     global patient_id
     patient_id = _patient_id
+    patient_data = get_storage()[patient_id]
+
+    if patient_data["disabled"]:
+        disabled = "Yes"
+    else:
+        disabled = "No"
+
+    print(patient_data["firstname"])
+    d = {
+        'Firstname': [patient_data["firstname"]],
+        'Lastname': [patient_data["lastname"]],
+        'Birthdate': [patient_data["birthdate"]],
+        'Disabled': [disabled],
+        'Trace name:': [patient_data["name"]]
+        }
+    df = pd.DataFrame(data=d)
+
     return html.Div(id='main-graph', children=[
         dcc.Dropdown(
             id='patient-dropdown',
@@ -61,6 +77,13 @@ def create_layout(_patient_id):
                 {'label': 'Patient 5', 'value': 5}
             ],
             value=patient_id
+        ),
+        dash_table.DataTable(
+            data=df.to_dict('records'),
+            columns=[
+                {'id': c, 'name': c }
+                for c in df.columns
+            ],
         ),
         dcc.Graph(id='the_plot', figure=draw_plot()),
         dcc.Interval(id='interval', interval=1000, n_intervals=0)

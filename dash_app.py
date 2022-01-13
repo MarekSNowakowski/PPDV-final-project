@@ -20,14 +20,20 @@ def draw_plot():
         timestamps = np.array([0])
         values = np.array([[0, 0, 0, 0, 0, 0]])
         anomalies = np.array([False, False, False, False, False, False])
-    fig = go.Figure([
-        go.Scatter(x=timestamps, y=values[:, 0], line=dict(color='darkblue', width=3), name='L0'),
-        go.Scatter(x=timestamps, y=values[:, 1], line=dict(color='blue', width=3), name='L1'),
-        go.Scatter(x=timestamps, y=values[:, 2], line=dict(color='lightblue', width=3), name='L2'),
-        go.Scatter(x=timestamps, y=values[:, 3], line=dict(color='darkgreen', width=3), name='R0'),
-        go.Scatter(x=timestamps, y=values[:, 4], line=dict(color='green', width=3), name='R1'),
-        go.Scatter(x=timestamps, y=values[:, 5], line=dict(color='lime', width=3), name='R2'),
-    ])
+    fig = go.Figure(
+        data=[
+            go.Scatter(x=timestamps, y=values[:, 0], line=dict(color='darkblue', width=3), name='L0'),
+            go.Scatter(x=timestamps, y=values[:, 1], line=dict(color='blue', width=3), name='L1'),
+            go.Scatter(x=timestamps, y=values[:, 2], line=dict(color='blueviolet', width=3), name='L2'),
+            go.Scatter(x=timestamps, y=values[:, 3], line=dict(color='darkgreen', width=3), name='R0'),
+            go.Scatter(x=timestamps, y=values[:, 4], line=dict(color='green', width=3), name='R1'),
+            go.Scatter(x=timestamps, y=values[:, 5], line=dict(color='lime', width=3), name='R2')],
+        layout=go.Layout(
+            height=400,
+            xaxis=dict(title='Trace time', nticks=10),  # Limit number of ticks to 10
+            yaxis=dict(title='Pressure')
+        )
+    )
     anomaly_timestamps = []
     anomaly_values = []
     for i in range(0, len(timestamps) - 1):
@@ -80,7 +86,7 @@ def create_layout(_patient_id):
         'Birthdate': [patient_data["birthdate"]],
         'Disabled': [disabled],
         'Trace name:': [patient_data["name"]]
-        }
+    }
     df = pd.DataFrame(data=d)
 
     return html.Div(id='main-graph', children=[
@@ -98,7 +104,7 @@ def create_layout(_patient_id):
         dash_table.DataTable(
             data=df.to_dict('records'),
             columns=[
-                {'id': c, 'name': c }
+                {'id': c, 'name': c}
                 for c in df.columns
             ],
         ),

@@ -4,14 +4,15 @@ import pandas as pd
 import plotly.graph_objects as go
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output
+from plotly.subplots import make_subplots
 
 from storage import get_storage
 
 global patient_id
 
 
-def draw_plot():
-    if 2 in get_storage():
+def get_data():
+    if patient_id in get_storage():
         patient_data = get_storage()[patient_id]
         timestamps = np.array(patient_data["timestamps"])
         values = np.array(patient_data["values"])
@@ -20,6 +21,24 @@ def draw_plot():
         timestamps = np.array([0])
         values = np.array([[0, 0, 0, 0, 0, 0]])
         anomalies = np.array([False, False, False, False, False, False])
+
+    # Create anomalies list
+    anomaly_timestamps = [[], [], [], [], [], []]
+    anomaly_values = [[], [], [], [], [], []]
+    for i in range(0, len(timestamps) - 1):
+        if anomalies[i].any():
+            j = 0
+            for anomaly in anomalies[i]:
+                if anomaly:
+                    anomaly_timestamps[j].append(timestamps[i])
+                    anomaly_values[j].append(values[i, j])
+                j += 1
+    return timestamps, values, anomaly_timestamps, anomaly_values
+
+
+def draw_main_plot():
+    timestamps, values, anomaly_timestamps, anomaly_values = get_data()
+
     fig = go.Figure(
         data=[
             go.Scatter(x=timestamps, y=values[:, 0], line=dict(color='darkblue', width=3), name='L0'),
@@ -27,30 +46,94 @@ def draw_plot():
             go.Scatter(x=timestamps, y=values[:, 2], line=dict(color='blueviolet', width=3), name='L2'),
             go.Scatter(x=timestamps, y=values[:, 3], line=dict(color='darkgreen', width=3), name='R0'),
             go.Scatter(x=timestamps, y=values[:, 4], line=dict(color='green', width=3), name='R1'),
-            go.Scatter(x=timestamps, y=values[:, 5], line=dict(color='lime', width=3), name='R2')],
+            go.Scatter(x=timestamps, y=values[:, 5], line=dict(color='lime', width=3), name='R2'),
+            go.Scatter(
+                x=[item for sublist in anomaly_timestamps for item in sublist],
+                y=[item for sublist in anomaly_values for item in sublist],
+                marker=dict(color="red", size=6),
+                mode="markers",
+                name="Anomaly",
+            )],
         layout=go.Layout(
-            height=400,
+            height=320,
             xaxis=dict(title='Trace time', nticks=10),  # Limit number of ticks to 10
-            yaxis=dict(title='Pressure')
+            yaxis=dict(title='Pressure', range=(0, 1100)),
+            template='plotly_white'
         )
     )
-    anomaly_timestamps = []
-    anomaly_values = []
-    for i in range(0, len(timestamps) - 1):
-        if anomalies[i].any():
-            j = 0
-            for anomaly in anomalies[i]:
-                if anomaly:
-                    anomaly_timestamps.append(timestamps[i])
-                    anomaly_values.append(values[i, j])
-                j += 1
+
+    return fig
+
+
+def draw_sub_plots():
+    timestamps, values, anomaly_timestamps, anomaly_values = get_data()
+
+    fig = make_subplots(rows=3, cols=2)
+
+    fig.add_trace(go.Scatter(x=timestamps, y=values[:, 0], line=dict(color='darkblue', width=3), name='L0'),
+                  row=1, col=1),
     fig.add_trace(go.Scatter(
-        x=anomaly_timestamps,
-        y=anomaly_values,
+        x=anomaly_timestamps[0],
+        y=anomaly_values[0],
         marker=dict(color="red", size=6),
         mode="markers",
         name="Anomaly",
-    ))
+    ),
+        row=1, col=1)
+    fig.add_trace(go.Scatter(x=timestamps, y=values[:, 1], line=dict(color='blue', width=3), name='L1'),
+                  row=2, col=1)
+    fig.add_trace(go.Scatter(
+        x=anomaly_timestamps[1],
+        y=anomaly_values[1],
+        marker=dict(color="red", size=6),
+        mode="markers",
+        name="Anomaly",
+    ),
+        row=2, col=1)
+    fig.add_trace(go.Scatter(x=timestamps, y=values[:, 2], line=dict(color='blueviolet', width=3), name='L2'),
+                  row=3, col=1)
+    fig.add_trace(go.Scatter(
+        x=anomaly_timestamps[2],
+        y=anomaly_values[2],
+        marker=dict(color="red", size=6),
+        mode="markers",
+        name="Anomaly",
+    ),
+        row=3, col=1)
+    fig.add_trace(go.Scatter(x=timestamps, y=values[:, 3], line=dict(color='darkgreen', width=3), name='R0'),
+                  row=1, col=2)
+    fig.add_trace(go.Scatter(
+        x=anomaly_timestamps[3],
+        y=anomaly_values[3],
+        marker=dict(color="red", size=6),
+        mode="markers",
+        name="Anomaly",
+    ),
+        row=1, col=2)
+    fig.add_trace(go.Scatter(x=timestamps, y=values[:, 4], line=dict(color='green', width=3), name='R1'),
+                  row=2, col=2)
+    fig.add_trace(go.Scatter(
+        x=anomaly_timestamps[4],
+        y=anomaly_values[4],
+        marker=dict(color="red", size=6),
+        mode="markers",
+        name="Anomaly",
+    ),
+        row=2, col=2)
+    fig.add_trace(go.Scatter(x=timestamps, y=values[:, 5], line=dict(color='lime', width=3), name='R2'),
+                  row=3, col=2)
+    fig.add_trace(go.Scatter(
+        x=anomaly_timestamps[5],
+        y=anomaly_values[5],
+        marker=dict(color="red", size=6),
+        mode="markers",
+        name="Anomaly",
+    ),
+        row=3, col=2)
+
+    fig.update_xaxes(nticks=10)
+    fig.update_yaxes(range=(0, 1100))
+    fig.update_layout(height=420, template='plotly_white', showlegend=False)
 
     return fig
 
@@ -65,7 +148,6 @@ app.layout = html.Div([
             style={'textAlign': 'center', 'marginTop': 40, 'marginBottom': 40}),
 
     html.Div(id='content', children=[
-        html.Div(id='main-graph', children=[])
     ])
 ])
 
@@ -108,7 +190,8 @@ def create_layout(_patient_id):
                 for c in df.columns
             ],
         ),
-        dcc.Graph(id='the_plot', figure=draw_plot()),
+        dcc.Graph(id='the_main_plot', figure=draw_main_plot()),
+        dcc.Graph(id='the_sub_plots', figure=draw_sub_plots()),
         dcc.Interval(id='interval', interval=1000, n_intervals=0)
     ])
 
@@ -122,10 +205,11 @@ def display_page(pathname):
         return create_layout(1)
 
 
-@app.callback(Output(component_id='the_plot', component_property='figure'),
+@app.callback(Output(component_id='the_main_plot', component_property='figure'),
+              Output(component_id='the_sub_plots', component_property='figure'),
               [Input(component_id='interval', component_property='n_intervals')])
 def graph_update(n_intervals):
-    return draw_plot()
+    return draw_main_plot(), draw_sub_plots()
 
 
 @app.callback(Output(component_id='url', component_property='pathname'),

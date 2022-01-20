@@ -36,9 +36,7 @@ def get_data():
     return timestamps, values, anomaly_timestamps, anomaly_values
 
 
-def draw_main_plot():
-    timestamps, values, anomaly_timestamps, anomaly_values = get_data()
-
+def draw_main_plot(timestamps, values, anomaly_timestamps, anomaly_values):
     fig = go.Figure(
         data=[
             go.Scatter(x=timestamps, y=values[:, 0], line=dict(color='darkblue', width=3), name='L0'),
@@ -65,9 +63,7 @@ def draw_main_plot():
     return fig
 
 
-def draw_sub_plots():
-    timestamps, values, anomaly_timestamps, anomaly_values = get_data()
-
+def draw_sub_plots(timestamps, values, anomaly_timestamps, anomaly_values):
     fig = make_subplots(rows=3, cols=2)
 
     fig.add_trace(go.Scatter(x=timestamps, y=values[:, 0], line=dict(color='darkblue', width=3), name='L0'),
@@ -138,6 +134,28 @@ def draw_sub_plots():
     return fig
 
 
+def draw_histograms(timestamps, values):
+    fig = make_subplots(rows=3, cols=2)
+
+    fig.add_trace(go.Histogram(x=values[:, 0], marker=dict(color='darkblue'), name='L0'),
+                  row=1, col=1),
+    fig.add_trace(go.Histogram(x=values[:, 1], marker=dict(color='blue'), name='L1'),
+                  row=2, col=1)
+    fig.add_trace(go.Histogram(x=values[:, 2], marker=dict(color='blueviolet'), name='L2'),
+                  row=3, col=1)
+    fig.add_trace(go.Histogram(x=values[:, 3], marker=dict(color='darkgreen'), name='R0'),
+                  row=1, col=2)
+    fig.add_trace(go.Histogram(x=values[:, 4], marker=dict(color='green'), name='R1'),
+                  row=2, col=2)
+    fig.add_trace(go.Histogram(x=values[:, 5], marker=dict(color='lime'), name='R2'),
+                  row=3, col=2)
+
+    fig.update_xaxes(range=(0, 1100))
+    fig.update_layout(height=420, template='plotly_white', showlegend=False)
+
+    return fig
+
+
 app = dash.Dash(__name__)
 
 app.layout = html.Div([
@@ -169,9 +187,11 @@ def create_layout(_patient_id):
         'Disabled': [disabled],
         'Trace name:': [patient_data["name"]]
     }
-    df = pd.DataFrame(data=d)
 
-    return html.Div(id='main-graph', children=[
+    df = pd.DataFrame(data=d)
+    timestamps, values, anomaly_timestamps, anomaly_values = get_data()
+
+    return html.Div(id='content-container', children=[
         dcc.Dropdown(
             id='patient-dropdown',
             options=[
@@ -190,8 +210,9 @@ def create_layout(_patient_id):
                 for c in df.columns
             ],
         ),
-        dcc.Graph(id='the_main_plot', figure=draw_main_plot()),
-        dcc.Graph(id='the_sub_plots', figure=draw_sub_plots()),
+        dcc.Graph(id='the_main_plot', figure=draw_main_plot(timestamps, values, anomaly_timestamps, anomaly_values)),
+        dcc.Graph(id='the_sub_plots', figure=draw_sub_plots(timestamps, values, anomaly_timestamps, anomaly_values)),
+        dcc.Graph(id='the_histograms', figure=draw_histograms(timestamps, values)),
         dcc.Interval(id='interval', interval=1000, n_intervals=0)
     ])
 
@@ -207,9 +228,13 @@ def display_page(pathname):
 
 @app.callback(Output(component_id='the_main_plot', component_property='figure'),
               Output(component_id='the_sub_plots', component_property='figure'),
+              Output(component_id='the_histograms', component_property='figure'),
               [Input(component_id='interval', component_property='n_intervals')])
 def graph_update(n_intervals):
-    return draw_main_plot(), draw_sub_plots()
+    timestamps, values, anomaly_timestamps, anomaly_values = get_data()
+    return draw_main_plot(timestamps, values, anomaly_timestamps, anomaly_values), \
+           draw_sub_plots(timestamps, values, anomaly_timestamps, anomaly_values), \
+           draw_histograms(timestamps, values)
 
 
 @app.callback(Output(component_id='url', component_property='pathname'),

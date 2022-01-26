@@ -159,27 +159,39 @@ def draw_histograms(timestamps, values):
 def draw_feet_plot(values):
     fig = go.Figure(
         data=[
-            go.Scatter(x=[0.3], y=[0.8], marker=dict(color='darkblue', size=values[0]/50), name='L0'),
-            go.Scatter(x=[0.3], y=[0.8], opacity=0.2, marker=dict(color='darkblue', size=20), name='L0'),
-            go.Scatter(x=[0.1], y=[0.6], marker=dict(color='blue', size=values[1]/50), name='L1'),
-            go.Scatter(x=[0.1], y=[0.6], opacity=0.2, marker=dict(color='blue', size=20), name='L1'),
-            go.Scatter(x=[0.2], y=[0.1], marker=dict(color='blueviolet', size=values[2]/50), name='L2'),
-            go.Scatter(x=[0.2], y=[0.1], opacity=0.2, marker=dict(color='blueviolet', size=20), name='L2'),
-            go.Scatter(x=[0.7], y=[0.8], marker=dict(color='darkgreen', size=values[3]/50), name='R0'),
-            go.Scatter(x=[0.7], y=[0.8], opacity=0.2, marker=dict(color='darkgreen', size=20), name='R0'),
-            go.Scatter(x=[0.9], y=[0.6], marker=dict(color='green', size=values[4]/50), name='R1'),
-            go.Scatter(x=[0.9], y=[0.6], opacity=0.2, marker=dict(color='green', size=20), name='R1'),
-            go.Scatter(x=[0.8], y=[0.1], marker=dict(color='lime', size=values[5]/50), name='R2'),
-            go.Scatter(x=[0.8], y=[0.1], opacity=0.2, marker=dict(color='lime', size=20), name='R2'),
+            go.Scatter(x=[0.35], y=[0.7], marker=dict(color='darkblue', size=values[0]/50), name='L0'),
+            go.Scatter(x=[0.35], y=[0.7], opacity=0.2, marker=dict(color='darkblue', size=20), name='L0'),
+            go.Scatter(x=[0.15], y=[0.55], marker=dict(color='blue', size=values[1]/50), name='L1'),
+            go.Scatter(x=[0.15], y=[0.55], opacity=0.2, marker=dict(color='blue', size=20), name='L1'),
+            go.Scatter(x=[0.28], y=[0.12], marker=dict(color='blueviolet', size=values[2]/50), name='L2'),
+            go.Scatter(x=[0.28], y=[0.12], opacity=0.2, marker=dict(color='blueviolet', size=20), name='L2'),
+            go.Scatter(x=[0.65], y=[0.7], marker=dict(color='darkgreen', size=values[3]/50), name='R0'),
+            go.Scatter(x=[0.65], y=[0.7], opacity=0.2, marker=dict(color='darkgreen', size=20), name='R0'),
+            go.Scatter(x=[0.85], y=[0.55], marker=dict(color='green', size=values[4]/50), name='R1'),
+            go.Scatter(x=[0.85], y=[0.55], opacity=0.2, marker=dict(color='green', size=20), name='R1'),
+            go.Scatter(x=[0.72], y=[0.12], marker=dict(color='lime', size=values[5]/50), name='R2'),
+            go.Scatter(x=[0.72], y=[0.12], opacity=0.2, marker=dict(color='lime', size=20), name='R2'),
             ],
         layout=go.Layout(
             xaxis=dict(range=(0, 1), showgrid=False, zeroline=False, visible=False),
             yaxis=dict(range=(0, 1), showgrid=False, zeroline=False, visible=False),
-            width=400,
-            height=400,
+            width=420,
+            height=420,
             template='plotly_white',
             showlegend=False
         )
+    )
+
+    fig.add_layout_image(
+        dict(
+            source="https://raw.githubusercontent.com/MarekSNowakowski/PPDV-final-project/main/img/feet.jpg",
+            x=0,
+            y=1,
+            sizex=1,
+            sizey=1,
+            sizing="stretch",
+            opacity=0.8,
+            layer="below")
     )
 
     return fig

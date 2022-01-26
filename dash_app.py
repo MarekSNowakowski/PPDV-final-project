@@ -156,6 +156,35 @@ def draw_histograms(timestamps, values):
     return fig
 
 
+def draw_feet_plot(values):
+    fig = go.Figure(
+        data=[
+            go.Scatter(x=[0.3], y=[0.8], marker=dict(color='darkblue', size=values[0]/50), name='L0'),
+            go.Scatter(x=[0.3], y=[0.8], opacity=0.2, marker=dict(color='darkblue', size=20), name='L0'),
+            go.Scatter(x=[0.1], y=[0.6], marker=dict(color='blue', size=values[1]/50), name='L1'),
+            go.Scatter(x=[0.1], y=[0.6], opacity=0.2, marker=dict(color='blue', size=20), name='L1'),
+            go.Scatter(x=[0.2], y=[0.1], marker=dict(color='blueviolet', size=values[2]/50), name='L2'),
+            go.Scatter(x=[0.2], y=[0.1], opacity=0.2, marker=dict(color='blueviolet', size=20), name='L2'),
+            go.Scatter(x=[0.7], y=[0.8], marker=dict(color='darkgreen', size=values[3]/50), name='R0'),
+            go.Scatter(x=[0.7], y=[0.8], opacity=0.2, marker=dict(color='darkgreen', size=20), name='R0'),
+            go.Scatter(x=[0.9], y=[0.6], marker=dict(color='green', size=values[4]/50), name='R1'),
+            go.Scatter(x=[0.9], y=[0.6], opacity=0.2, marker=dict(color='green', size=20), name='R1'),
+            go.Scatter(x=[0.8], y=[0.1], marker=dict(color='lime', size=values[5]/50), name='R2'),
+            go.Scatter(x=[0.8], y=[0.1], opacity=0.2, marker=dict(color='lime', size=20), name='R2'),
+            ],
+        layout=go.Layout(
+            xaxis=dict(range=(0, 1), showgrid=False, zeroline=False, visible=False),
+            yaxis=dict(range=(0, 1), showgrid=False, zeroline=False, visible=False),
+            width=400,
+            height=400,
+            template='plotly_white',
+            showlegend=False
+        )
+    )
+
+    return fig
+
+
 app = dash.Dash(__name__)
 
 app.layout = html.Div([
@@ -210,6 +239,10 @@ def create_layout(_patient_id):
                 for c in df.columns
             ],
         ),
+        html.Center(children=[
+            dcc.Graph(id='feet_plot', figure=draw_feet_plot(values[len(values) - 1]))
+        ]
+        ),
         dcc.Graph(id='the_main_plot', figure=draw_main_plot(timestamps, values, anomaly_timestamps, anomaly_values)),
         dcc.Graph(id='the_sub_plots', figure=draw_sub_plots(timestamps, values, anomaly_timestamps, anomaly_values)),
         dcc.Graph(id='the_histograms', figure=draw_histograms(timestamps, values)),
@@ -229,12 +262,14 @@ def display_page(pathname):
 @app.callback(Output(component_id='the_main_plot', component_property='figure'),
               Output(component_id='the_sub_plots', component_property='figure'),
               Output(component_id='the_histograms', component_property='figure'),
+              Output(component_id='feet_plot', component_property='figure'),
               [Input(component_id='interval', component_property='n_intervals')])
 def graph_update(n_intervals):
     timestamps, values, anomaly_timestamps, anomaly_values = get_data()
     return draw_main_plot(timestamps, values, anomaly_timestamps, anomaly_values), \
            draw_sub_plots(timestamps, values, anomaly_timestamps, anomaly_values), \
-           draw_histograms(timestamps, values)
+           draw_histograms(timestamps, values), \
+           draw_feet_plot(values[len(values) - 1])
 
 
 @app.callback(Output(component_id='url', component_property='pathname'),

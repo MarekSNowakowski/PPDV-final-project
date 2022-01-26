@@ -64,7 +64,8 @@ def draw_main_plot(timestamps, values, anomaly_timestamps, anomaly_values):
 
 
 def draw_sub_plots(timestamps, values, anomaly_timestamps, anomaly_values):
-    fig = make_subplots(rows=3, cols=2)
+    fig = make_subplots(rows=3, cols=2,
+                        subplot_titles=("L0", "R0", "L1", "R1", "L2", "R2"))
 
     fig.add_trace(go.Scatter(x=timestamps, y=values[:, 0], line=dict(color='darkblue', width=3), name='L0'),
                   row=1, col=1),
@@ -135,7 +136,8 @@ def draw_sub_plots(timestamps, values, anomaly_timestamps, anomaly_values):
 
 
 def draw_histograms(timestamps, values):
-    fig = make_subplots(rows=3, cols=2)
+    fig = make_subplots(rows=3, cols=2,
+                        subplot_titles=("L0", "R0", "L1", "R1", "L2", "R2"))
 
     fig.add_trace(go.Histogram(x=values[:, 0], marker=dict(color='darkblue'), name='L0'),
                   row=1, col=1),
